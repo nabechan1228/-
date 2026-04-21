@@ -18,12 +18,29 @@ export default function Home() {
     type: null
   });
 
+  const heroImages = [
+    '/images/hero1.png',
+    '/images/hero2.png',
+    '/images/hero3.png',
+    '/images/hero4.png',
+  ];
+  const [heroIndex, setHeroIndex] = useState(0);
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    // Auto slider crossing every 6s
+    const sliderInterval = setInterval(() => {
+      setHeroIndex(prev => (prev + 1) % heroImages.length);
+    }, 6000);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearInterval(sliderInterval);
+    };
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -77,13 +94,16 @@ export default function Home() {
 
       {/* Hero Section */}
       <section id="hero" className={styles.hero}>
-        <Image 
-          src="/images/hero_exterior.png" 
-          alt="渡部工務店の誇れる邸宅" 
-          fill
-          priority
-          className={styles.heroImage}
-        />
+        {heroImages.map((src, idx) => (
+          <Image 
+            key={src}
+            src={src} 
+            alt={`渡部工務店の誇れる邸宅 ${idx + 1}`} 
+            fill
+            priority={idx === 0}
+            className={`${styles.heroImage} ${idx === heroIndex ? styles.activeHero : styles.inactiveHero}`}
+          />
+        ))}
         <div className={styles.heroOverlay}></div>
         <div className={`${styles.heroContent} animate-fade-in`}>
           <p className={styles.subtitle}>Watanabe Komuten's Premium Quality</p>
@@ -99,15 +119,32 @@ export default function Home() {
       {/* Concept Section */}
       <section id="concept" className="section-padding">
         <div className="container">
-          <div className={styles.conceptGrid}>
-            <div className={styles.conceptText}>
-              <h2 className={styles.sectionTitleLeft}>人生を豊かにする邸宅、<br/>その真価。</h2>
-              <p>家はただの箱ではありません。家族の成長を見守り、日々の安らぎを生み出し、やがては次世代へと受け継がれる大切な「資産」です。</p>
-              <p>渡部工務店は、積み重ねてきた技術と経験を活かし、周囲の環境と調和しながらも圧倒的な存在感を放つ、美しく力強い邸宅を描き出します。</p>
-              <div className={styles.signature}>渡部工務店</div>
+          <div className={styles.conceptHeader}>
+            <h2 className={styles.sectionTitleLeft}>
+              <span className={styles.conceptSub}>Philosophy</span><br/>
+              人生を豊かにする邸宅、<br/>その真価。
+            </h2>
+            <div className={styles.conceptLead}>
+              家はただの箱ではありません。家族の成長を見守り、日々の安らぎを生み出し、やがては次世代へと受け継がれる大切な「資産」です。<br/><br/>
+              渡部工務店は、積み重ねてきた技術と経験を活かし、周囲の環境と調和しながらも圧倒的な存在感を放つ、美しく力強い邸宅を描き出します。
             </div>
-            <div className={styles.conceptImageWrapper}>
-              <Image src="/images/exterior.png" alt="Concept Exterior" fill className={styles.conceptImg} />
+          </div>
+          
+          <div className={styles.conceptGridRich}>
+            <div className={styles.conceptImgBox1}>
+              <div className={styles.conceptImageWrapper}>
+                <Image src="/images/hero3.png" alt="美しい中庭" fill className={styles.conceptImg} />
+              </div>
+            </div>
+            <div className={styles.conceptImgBox2}>
+              <div className={styles.conceptImageWrapper}>
+                <Image src="/images/hero4.png" alt="洗練されたダイニング" fill className={styles.conceptImg} />
+              </div>
+            </div>
+            <div className={styles.conceptContentBox}>
+              <h3 className={styles.conceptSmallTitle}>時を超える、普遍的な美しさ</h3>
+              <p>光と影の移ろいを計算し尽くした空間設計。昼は自然光が優しく室内を包み込み、夜は計算された照明が重厚感のある雰囲気を演出します。どんな時代にも流されない、洗練された「本物の価値」をお届けします。</p>
+              <div className={styles.signature}>渡部工務店</div>
             </div>
           </div>
         </div>
