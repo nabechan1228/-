@@ -65,14 +65,13 @@ export default function Home() {
     <div className={styles.container}>
       {/* Navigation */}
       <nav className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}>
-        <div className={styles.logo}>ICHIJO YAMAGATA</div>
+        <div className={styles.logo}>WATANABE KOMUTEN</div>
         <div className={styles.navLinks}>
-          <a href="#hero">ホーム</a>
-          <a href="#performance">テクノロジー</a>
-          <a href="#lineup">ラインナップ</a>
-          <a href="#gallery">建築実例</a>
-          <a href="#voices">お客様の声</a>
-          <a href="#contact">お問い合わせ</a>
+          <a href="#hero">トップ</a>
+          <a href="#concept">コンセプト</a>
+          <a href="#gallery">インテリア空間</a>
+          <a href="#technology">確かな技術</a>
+          <a href="#contact">ご相談・お問合せ</a>
         </div>
       </nav>
 
@@ -80,144 +79,90 @@ export default function Home() {
       <section id="hero" className={styles.hero}>
         <Image 
           src="/images/hero_exterior.png" 
-          alt="一条工務店の美しい家" 
+          alt="渡部工務店の誇れる邸宅" 
           fill
           priority
           className={styles.heroImage}
         />
         <div className={styles.heroOverlay}></div>
         <div className={`${styles.heroContent} animate-fade-in`}>
-          <p className={styles.subtitle}>山形エリア 性能・品質 No.1 への挑戦</p>
-          <h1>「家は、性能。」<br />理想を超える暮らしを。</h1>
-          <p>全館床暖房、超気密・超断熱。圧倒的な住宅性能で、山形の厳しい冬も夏も、一年中快適な住まいをご提案します。</p>
+          <p className={styles.subtitle}>Watanabe Komuten's Premium Quality</p>
+          <h1>「誇れる住まいを、<br />あなたと共に。」</h1>
+          <p className={styles.heroText}>洗練されたデザイン、そして末長く続く安心。<br/>地域に根ざし、生涯にわたる価値を育む住まいをご提案します。</p>
           <div className={styles.ctaGroup}>
-            <a href="#contact" className="btn btn-accent">資料請求はこちら</a>
-            <a href="#contact" className="btn btn-secondary">展示場予約</a>
+            <a href="#contact" className={`btn ${styles.btnGold}`}>カタログ請求</a>
+            <a href="#contact" className={`btn ${styles.btnNavy}`}>展示場来場予約</a>
           </div>
         </div>
       </section>
 
-      {/* Performance Section with Richer Layout */}
-      <section id="performance" className="section-padding">
+      {/* Concept Section */}
+      <section id="concept" className="section-padding">
         <div className="container">
-          <h2 className={styles.sectionTitle}>圧倒的な住宅性能</h2>
-          <div className={styles.performanceGrid}>
-            <div className={styles.performanceImage}>
-              <div className={styles.imageReveal}>
-                <Image 
-                  src="/images/performance_tech.png" 
-                  alt="テクノロジーイメージ" 
-                  width={600} 
-                  height={500} 
-                  className={styles.richImage}
-                />
-              </div>
+          <div className={styles.conceptGrid}>
+            <div className={styles.conceptText}>
+              <h2 className={styles.sectionTitleLeft}>人生を豊かにする邸宅、<br/>その真価。</h2>
+              <p>家はただの箱ではありません。家族の成長を見守り、日々の安らぎを生み出し、やがては次世代へと受け継がれる大切な「資産」です。</p>
+              <p>渡部工務店は、積み重ねてきた技術と経験を活かし、周囲の環境と調和しながらも圧倒的な存在感を放つ、美しく力強い邸宅を描き出します。</p>
+              <div className={styles.signature}>渡部工務店</div>
             </div>
-            <div className={styles.performanceContent}>
-              <div className={styles.performanceItemBox}>
-                <span className={styles.badge}>業界最高水準</span>
-                <h3>外内ダブル断熱構法</h3>
-                <p>家全体を高性能断熱材で包み込み、魔法瓶のような保温性を実現。冷暖房効率を格段に高め、光熱費の大幅な削減に貢献します。</p>
-              </div>
-              <div className={styles.performanceItemBox}>
-                <span className={styles.badge}>標準仕様</span>
-                <h3>全館床暖房システム</h3>
-                <p>リビングだけでなく、廊下、お風呂場、トイレまで家中の温度を一定に。温度差によるヒートショックのリスクを軽減し、冬でも裸足で過ごせる快適さを提供します。</p>
-              </div>
+            <div className={styles.conceptImageWrapper}>
+              <Image src="/images/exterior.png" alt="Concept Exterior" fill className={styles.conceptImg} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* NEW: Rich Gallery Section */}
-      <section id="gallery" className={`section-padding ${styles.bgDark}`}>
-        <div className="container">
-          <h2 className={`${styles.sectionTitle} ${styles.textWhite}`}>建築実例ギャラリー</h2>
-          <p className={styles.sectionSubtitle}>山形の風土に寄り添い、確かな性能に裏付けられた美しいデザインの数々。</p>
-          <div className={styles.galleryGrid}>
-            <div className={`${styles.galleryItem} ${styles.span2}`}>
-              <Image src="/images/exterior.png" alt="外観" fill className={styles.galleryImg} />
-              <div className={styles.galleryCaption}>自然と調和するモダンな外観</div>
-            </div>
-            <div className={styles.galleryItem}>
-              <Image src="/images/interior.png" alt="内装" fill className={styles.galleryImg} />
-              <div className={styles.galleryCaption}>温もりのあるリビング空間</div>
-            </div>
-            <div className={styles.galleryItem}>
-              <Image src="/images/lineup_house_a.png" alt="外観夜景" fill className={styles.galleryImg} />
-              <div className={styles.galleryCaption}>洗練された夜の表情</div>
-            </div>
-            <div className={`${styles.galleryItem} ${styles.span2}`}>
-              <Image src="/images/hero_exterior.png" alt="アプローチ" fill className={styles.galleryImg} />
-              <div className={styles.galleryCaption}>品格あふれる佇まい</div>
-            </div>
+      {/* Infinite Horizontal Scroll Gallery */ }
+      <section id="gallery" className={styles.gallerySection}>
+        <div className={styles.galleryHeader}>
+          <h2 className={styles.sectionTitle}>シームレスに繋がる、上質なインテリア</h2>
+          <p className={styles.sectionSubtitle}>光と影が織りなす極上の表情。洗練された内装デザインの数々をご覧ください。</p>
+        </div>
+        
+        <div className={styles.scrollContainer}>
+          <div className={styles.scrollTrack}>
+            {/* Set 1 */}
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/interior.png" alt="快適なリビング" className={styles.scrollImg} /></div></div>
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/hero_exterior.png" alt="圧倒的な外観" className={styles.scrollImg} /></div></div>
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/exterior.png" alt="モダンな内装" className={styles.scrollImg} /></div></div>
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/lineup_house_a.png" alt="夜の上質な空間" className={styles.scrollImg} /></div></div>
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/performance_tech.png" alt="こだわりの設備" className={styles.scrollImg} /></div></div>
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/interior.png" alt="安らぎの寝室" className={styles.scrollImg} /></div></div>
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/hero_exterior.png" alt="自然と調和するインテリア" className={styles.scrollImg} /></div></div>
+            {/* Set 2 (Duplicated for seamless loop) */}
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/interior.png" alt="快適なリビング" className={styles.scrollImg} /></div></div>
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/hero_exterior.png" alt="圧倒的な外観" className={styles.scrollImg} /></div></div>
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/exterior.png" alt="モダンな内装" className={styles.scrollImg} /></div></div>
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/lineup_house_a.png" alt="夜の上質な空間" className={styles.scrollImg} /></div></div>
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/performance_tech.png" alt="こだわりの設備" className={styles.scrollImg} /></div></div>
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/interior.png" alt="安らぎの寝室" className={styles.scrollImg} /></div></div>
+            <div className={styles.scrollItem}><div className={styles.scrollImageWrapper}><img src="/images/hero_exterior.png" alt="自然と調和するインテリア" className={styles.scrollImg} /></div></div>
           </div>
         </div>
       </section>
 
-      {/* Lineup Section */}
-      <section id="lineup" className="section-padding" style={{ backgroundColor: '#F8F8F8' }}>
+      {/* Technology Section */}
+      <section id="technology" className={`section-padding ${styles.bgDark}`}>
         <div className="container">
-          <h2 className={styles.sectionTitle}>商品ラインナップ</h2>
-          <div className={styles.lineupGrid}>
-            <div className={styles.richCard}>
-              <div className={styles.cardImageWrapper}>
-                <Image src="/images/lineup_house_a.png" alt="GRAND SMART" fill className={styles.cardImg} />
-              </div>
-              <div className={styles.cardContent}>
-                <h3>GRAND SMART</h3>
-                <p>一条工務店の技術の粋を集めた、機能性とデザイン性を両立した最高級モデル。</p>
-                <a href="#contact" className={styles.textLink}>詳細を見る →</a>
-              </div>
+          <h2 className={`${styles.sectionTitle} ${styles.textWhite}`}>未来へ続く、確かな技術力</h2>
+          <p className={styles.sectionSubtitleWait}>美しさだけではなく、安心と快適さを支える先進のテクノロジー。</p>
+          
+          <div className={styles.techGrid}>
+            <div className={styles.techCard}>
+              <div className={styles.techIcon}>🛡️</div>
+              <h3>強靭な構造体</h3>
+              <p>独自の高耐久構造により、巨大地震にも耐えうる圧倒的な安全性を確保。ご家族の命と財産を守り抜きます。</p>
             </div>
-            <div className={styles.richCard}>
-              <div className={styles.cardImageWrapper}>
-                <Image src="/images/interior.png" alt="i-smart" fill className={styles.cardImg} />
-              </div>
-              <div className={styles.cardContent}>
-                <h3>i-smart</h3>
-                <p>美しさと機能の両立。洗練されたデザインが、スマートな暮らしを叶えます。</p>
-                <a href="#contact" className={styles.textLink}>詳細を見る →</a>
-              </div>
+            <div className={styles.techCard}>
+              <div className={styles.techIcon}>🍃</div>
+              <h3>次世代断熱性能</h3>
+              <p>四季を通じてもっとも快適な室温を保ちます。冷暖房効率を飛躍的に高め、環境にもお財布にも優しい暮らしを。</p>
             </div>
-            <div className={styles.richCard}>
-              <div className={styles.cardImageWrapper}>
-                <Image src="/images/exterior.png" alt="SAISON" fill className={styles.cardImg} />
-              </div>
-              <div className={styles.cardContent}>
-                <h3>SAISON</h3>
-                <p>本物の素材にこだわった、時を経るほどに趣が増す格調高い住まい。</p>
-                <a href="#contact" className={styles.textLink}>詳細を見る →</a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* NEW: Owner Voices Section */}
-      <section id="voices" className="section-padding">
-        <div className="container">
-          <h2 className={styles.sectionTitle}>オーナー様の声</h2>
-          <div className={styles.voicesGrid}>
-            <div className={styles.voiceCard}>
-              <div className={styles.voiceQuote}>"冬の朝、素足で歩ける快適さに感動しました。結露も全くなく、空気がきれいで快適です。"</div>
-              <div className={styles.voiceAuthor}>
-                <div className={styles.authorAvatar}><Image src="/images/interior.png" alt="A様邸" fill /></div>
-                <div>
-                  <strong>山形市 A様</strong><br />
-                  <span className={styles.microText}>i-smart 建築 / 30代ご夫婦</span>
-                </div>
-              </div>
-            </div>
-            <div className={styles.voiceCard}>
-              <div className={styles.voiceQuote}>"太陽光発電と優れた断熱性のおかげで、光熱費が以前の賃貸マンション時代より安くなりました。"</div>
-              <div className={styles.voiceAuthor}>
-                <div className={styles.authorAvatar}><Image src="/images/hero_exterior.png" alt="B様邸" fill /></div>
-                <div>
-                  <strong>天童市 B様</strong><br />
-                  <span className={styles.microText}>GRAND SMART 建築 / 40代ご家族</span>
-                </div>
-              </div>
+            <div className={styles.techCard}>
+              <div className={styles.techIcon}>✨</div>
+              <h3>ロングライフ設計</h3>
+              <p>数十年後も価値が維持できるよう、メンテナンス性に優れた外壁や屋根材を標準採用。末長い安心をお約束します。</p>
             </div>
           </div>
         </div>
@@ -228,19 +173,22 @@ export default function Home() {
         <div className="container">
           <div className={styles.contactWrapper}>
             <div className={styles.contactInfo}>
-              <h2 className={styles.contactTitle}>理想の住まいづくりを、<br/>ここから。</h2>
-              <p>最新のカタログや、展示場へのご来場予約はお気軽にお申し付けください。専門スタッフが丁寧にご案内いたします。</p>
+              <h2 className={styles.contactTitle}>あなたの理想を、<br/>かたちに。</h2>
+              <p className={styles.contactDesc}>
+                カタログのご請求、モデルハウスのご見学、あるいは土地活用のご相談など、どんなことでもお気軽にお問い合わせください。<br/><br/>
+                渡部工務店の専門スタッフが、一邸一邸、真心こめて対応させていただきます。
+              </p>
             </div>
             <div className={styles.contactContainer}>
               <form onSubmit={handleSubmit}>
                 <div className={styles.formGrid}>
                   <div className={styles.formGroup}>
                     <label htmlFor="name">お名前</label>
-                    <input type="text" id="name" name="name" placeholder="一条 太郎" required value={formData.name} onChange={handleChange} />
+                    <input type="text" id="name" name="name" placeholder="渡部 太郎" required value={formData.name} onChange={handleChange} />
                   </div>
                   <div className={styles.formGroup}>
                     <label htmlFor="email">メールアドレス</label>
-                    <input type="email" id="email" name="email" placeholder="example@ichijo.co.jp" required value={formData.email} onChange={handleChange} />
+                    <input type="email" id="email" name="email" placeholder="example@watanabe.co.jp" required value={formData.email} onChange={handleChange} />
                   </div>
                 </div>
                 <div className={styles.formGroup}>
@@ -249,9 +197,9 @@ export default function Home() {
                 </div>
                 <div className={styles.formGroup}>
                   <label htmlFor="message">お問い合わせ・ご相談内容</label>
-                  <textarea id="message" name="message" placeholder="展示場の見学予約や、資料請求についてのご要望をご記入ください。" required value={formData.message} onChange={handleChange}></textarea>
+                  <textarea id="message" name="message" placeholder="展示場の見学予約や、間取りのご相談などご自由にご記入ください。" required value={formData.message} onChange={handleChange}></textarea>
                 </div>
-                <button type="submit" className={`btn btn-secondary ${styles.submitBtn}`} disabled={status.loading}>
+                <button type="submit" className={`btn ${styles.btnNavy} ${styles.submitBtn}`} disabled={status.loading}>
                   {status.loading ? '送信中...' : 'この内容で送信する'}
                 </button>
                 
@@ -269,17 +217,17 @@ export default function Home() {
       <footer className={styles.footer}>
         <div className="container">
           <div className={styles.footerTop}>
-            <p className={styles.logo} style={{ color: '#fff' }}>ICHIJO YAMAGATA</p>
+            <h2 className={styles.footerLogo}>WATANABE KOMUTEN</h2>
             <div className={styles.footerLinks}>
               <a href="#">企業情報</a>
+              <a href="#">サステナビリティ</a>
+              <a href="#">採用情報</a>
               <a href="#">プライバシーポリシー</a>
-              <a href="#">サイトマップ</a>
             </div>
           </div>
-          <p className={styles.copyright}>&copy; 2026 Ichijo Komuten Yamagata Area. All rights reserved.</p>
+          <p className={styles.copyright}>&copy; 2026 Watanabe Komuten. All rights reserved.</p>
         </div>
       </footer>
     </div>
   );
 }
-

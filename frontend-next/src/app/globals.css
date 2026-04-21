@@ -1,17 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
 
 :root {
-  --color-primary: #94846B;      /* Ichijo Brown */
-  --color-secondary: #007BC3;    /* Professional Blue for CTA */
-  --color-accent: #D28313;       /* Gold/Orange for Highlight CTA */
-  --color-bg-light: #F8F8F8;     /* Off-white background */
-  --color-text-dark: #333333;    /* Main text */
-  --color-text-muted: #666666;   /* Muted text */
+  --color-primary: #0A2240;      /* Deep Navy */
+  --color-secondary: #1F3B5C;    /* Sophisticated Blue */
+  --color-accent: #C5A059;       /* Elegant Gold */
+  --color-bg-light: #F9F9F9;     /* Off-white background */
+  --color-text-dark: #2C2C2C;    /* Main text */
+  --color-text-muted: #737373;   /* Muted text */
   --color-white: #FFFFFF;
   
   --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
-  --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
 }
 
 * {
