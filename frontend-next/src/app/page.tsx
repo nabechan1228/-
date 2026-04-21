@@ -217,6 +217,21 @@ export default function Home() {
               </p>
             </div>
             <div className={styles.contactContainer}>
+              <div className={styles.sslBlock}>
+                <div className={styles.sslHeader}>
+                  <span className={styles.sslIcon}>🔒</span>
+                  <span className={styles.sslTitle}>当サイトは全ページSSL/HTTPS対応です</span>
+                </div>
+                <p className={styles.sslDesc}>
+                  現代のWebサイトにおいて必須であるSSL証明書を導入し、以下の効果でお客様に安心・安全な環境を提供しています。
+                </p>
+                <ul className={styles.sslList}>
+                  <li><strong>データ通信の暗号化によるセキュリティ確保</strong>：お預かりする大切な個人情報は高度に暗号化され、安全に送信されます。</li>
+                  <li><strong>「保護されていない通信」という警告表示の回避</strong>：ブラウザの警告を排除し、快適で安心してご利用いただける環境を構築しています。</li>
+                  <li><strong>Google検索でのランキング要因としての効果</strong>：検索エンジンの推奨基準をクリアした、信頼性の高いシステムで運用されています。</li>
+                </ul>
+              </div>
+
               <form onSubmit={handleSubmit}>
                 <div className={styles.formGrid}>
                   <div className={styles.formGroup}>

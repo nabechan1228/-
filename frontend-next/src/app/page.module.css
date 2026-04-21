@@ -437,6 +437,62 @@
   box-shadow: var(--shadow-lg);
 }
 
+.sslBlock {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-left: 4px solid var(--color-primary);
+  padding: 25px;
+  margin-bottom: 30px;
+  border-radius: 4px;
+}
+
+.sslHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.sslIcon {
+  font-size: 20px;
+  margin-right: 12px;
+}
+
+.sslTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.sslDesc {
+  font-size: 13.5px;
+  color: var(--color-text-dark);
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.sslList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sslList li {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+  padding-left: 20px;
+  position: relative;
+  line-height: 1.6;
+}
+
+.sslList li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--color-accent);
+  font-weight: bold;
+}
+
 .formGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
