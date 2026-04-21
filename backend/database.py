@@ -1,23 +1,24 @@
-import os
+"""
+データベース接続設定
+SQLAlchemy エンジンとセッション管理
+"""
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from dotenv import load_dotenv
+from sqlalchemy.orm import sessionmaker, declarative_base
+from config import get_settings
 
-load_dotenv()
+settings = get_settings()
 
-user = os.getenv("MYSQL_USER", "root")
-password = os.getenv("MYSQL_PASSWORD", "")
-host = os.getenv("MYSQL_HOST", "localhost")
-port = os.getenv("MYSQL_PORT", "3306")
-database = os.getenv("MYSQL_DATABASE", "housemaker_db")
+engine = create_engine(
+    settings.database_url,
+    pool_size=5,
+    max_overflow=10,
+    pool_recycle=3600,
+    pool_pre_ping=True,
+)
 
-# pymysqlを使用
-SQLALCHEMY_DATABASE_URL = f"mysql+pymysql://{user}:{password}@{host}:{port}/{database}?charset=utf8mb4"
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
 
 # DBセッション取得用
 def get_db():

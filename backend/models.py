@@ -1,6 +1,10 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
+"""
+データベースモデル定義
+"""
+from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean
 from database import Base
-import datetime
+from datetime import datetime, timezone
+
 
 class ContactItem(Base):
     __tablename__ = "contacts"
@@ -10,4 +14,5 @@ class ContactItem(Base):
     email = Column(String(100), nullable=False)
     phone = Column(String(20), nullable=True)
     message = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    is_read = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
