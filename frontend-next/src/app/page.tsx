@@ -84,11 +84,11 @@ export default function Home() {
       <nav className={`${styles.navbar} ${scrolled ? styles.scrolled : ''}`}>
         <div className={styles.logo}>WATANABE KOMUTEN</div>
         <div className={styles.navLinks}>
-          <a href="#hero">トップ</a>
-          <a href="#concept">コンセプト</a>
-          <a href="#gallery">インテリア空間</a>
-          <a href="#technology">確かな技術</a>
-          <a href="#contact">ご相談・お問合せ</a>
+          <a href="/">トップ</a>
+          <a href="/works">施工事例</a>
+          <a href="/showrooms">展示場</a>
+          <a href="/company">会社概要</a>
+          <a href="/#contact">お問い合わせ</a>
         </div>
       </nav>
 
@@ -271,10 +271,10 @@ export default function Home() {
           <div className={styles.footerTop}>
             <h2 className={styles.footerLogo}>WATANABE KOMUTEN</h2>
             <div className={styles.footerLinks}>
-              <a href="#">企業情報</a>
-              <a href="#">サステナビリティ</a>
-              <a href="#">採用情報</a>
-              <a href="#">プライバシーポリシー</a>
+              <a href="/company">会社概要</a>
+              <a href="/works">施工事例</a>
+              <a href="/showrooms">展示場</a>
+              <a href="/#contact">お問い合わせ</a>
             </div>
           </div>
           <p className={styles.copyright}>&copy; 2026 Watanabe Komuten. All rights reserved.</p>
