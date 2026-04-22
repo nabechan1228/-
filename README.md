@@ -3,6 +3,25 @@
 このプロジェクトは、住宅メーカー（渡部工務店）の公式ウェブサイトおよび社内用管理システム（CMS）のソースコードです。
 フロントエンドは Next.js、バックエンドは FastAPI (Python) を使用して構築されています。
 
+## セキュリティ対応状況
+
+| 項目 | 状態 | 詳細 |
+|------|------|------|
+| `.env`のGit除外 | ✅ | `.gitignore`で除外済み |
+| CORS制限 | ✅ | `ALLOWED_ORIGINS`環境変数で制御 |
+| レート制限 | ✅ | 全API（5〜30回/分）に適用済み |
+| JWT認証 | ✅ | 管理者API全体をJWT保護 |
+| セキュリティヘッダー | ✅ | X-Content-Type-Options等を付与 |
+| 入力バリデーション | ✅ | 全エンドポイントの入力に制約を適用 |
+| 画像URLインジェクション対策 | ✅ | `https?://`以外のURLを拒否 |
+| ログインジェクション対策 | ✅ | ログ出力前に`repr()`でサニタイズ |
+| 公開APIのDoS対策 | ✅ | limitキャップ（最大100件）とレート制限 |
+| SMTP TLS証明書検証 | ✅ | `ssl.create_default_context()`で有効化 |
+| Swagger UI本番公開 | ✅ | 本番キー使用時は自動で無効化 |
+| 例外処理（CRUD API） | ✅ | DB操作すべてにtry/exceptとロールバックを追加 |
+| 管理者トークン保管場所 | ⚠️ | `localStorage`使用（XSSリスクあり。将来的にHttpOnly Cookie化を推奨） |
+| node_modulesのGit除外 | ✅ | `.gitignore`で除外済み |
+
 ## 概要
 
 ### 一般公開サイト (Frontend)

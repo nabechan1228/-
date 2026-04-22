@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     smtp_from_email: str = "info@watanabe-komuten.example.com"
     smtp_from_name: str = "渡部工務店"
 
+    # サイトURL設定（メール本文などで使用）
+    site_url: str = "http://localhost:3000"
+
     # 管理者認証
     admin_username: str = "admin"
     admin_password_hash: str = ""

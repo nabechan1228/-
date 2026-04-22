@@ -34,9 +34,12 @@ models.Base.metadata.create_all(bind=engine)
 # レート制限の設定（config_filename=NoneでWindows CP932エンコーディング問題を回避）
 limiter = Limiter(key_func=get_remote_address, config_filename=None)
 
+# 開発環境（デフォルトキー使用時）のみSwagger UIを有効化
+_is_dev = settings.jwt_secret_key == "change-me-in-production"
 app = FastAPI(
     title="House Maker API",
-    docs_url="/docs" if settings.jwt_secret_key == "change-me-in-production" else None,
+    docs_url="/docs" if _is_dev else None,
+    openapi_url="/openapi.json" if _is_dev else None,
     redoc_url=None,
 )
 app.state.limiter = limiter
@@ -107,6 +110,21 @@ class AdminLogin(BaseModel):
     username: str
     password: str
 
+    @field_validator("username")
+    @classmethod
+    def validate_username(cls, v: str) -> str:
+        v = v.strip()
+        if len(v) > 100:
+            raise ValueError("ユーザー名が長すぎます")
+        return v
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) > 200:
+            raise ValueError("パスワードが長すぎます")
+        return v
+
 
 class ContactResponse(BaseModel):
     id: int
@@ -126,6 +144,22 @@ class NewsCreate(BaseModel):
     content: str
     is_published: bool = True
 
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, v: str) -> str:
+        v = v.strip()
+        if not v or len(v) > 200:
+            raise ValueError("タイトルは1〜200文字で入力してください")
+        return v
+
+    @field_validator("content")
+    @classmethod
+    def validate_content(cls, v: str) -> str:
+        v = v.strip()
+        if not v or len(v) > 5000:
+            raise ValueError("本文は1〜5000文字で入力してください")
+        return v
+
 class NewsResponse(BaseModel):
     id: int
     title: str
@@ -142,6 +176,54 @@ class WorkCreate(BaseModel):
     main_image_url: str | None = None
     location: str | None = None
     price_range: str | None = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, v: str) -> str:
+        v = v.strip()
+        if not v or len(v) > 200:
+            raise ValueError("タイトルは1〜200文字で入力してください")
+        return v
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, v: str) -> str:
+        v = v.strip()
+        if not v or len(v) > 3000:
+            raise ValueError("説明文は1〜3000文字で入力してください")
+        return v
+
+    @field_validator("main_image_url")
+    @classmethod
+    def validate_image_url(cls, v: str | None) -> str | None:
+        if v is None or v == "":
+            return None
+        v = v.strip()
+        if not re.match(r"^https?://", v):
+            raise ValueError("画像URLはhttpまたはhttpsで始まる必要があります")
+        if len(v) > 500:
+            raise ValueError("画像URLが長すぎます")
+        return v
+
+    @field_validator("location")
+    @classmethod
+    def validate_location(cls, v: str | None) -> str | None:
+        if v is None or v == "":
+            return None
+        v = v.strip()
+        if len(v) > 100:
+            raise ValueError("所在地は100文字以内で入力してください")
+        return v
+
+    @field_validator("price_range")
+    @classmethod
+    def validate_price_range(cls, v: str | None) -> str | None:
+        if v is None or v == "":
+            return None
+        v = v.strip()
+        if len(v) > 100:
+            raise ValueError("価格帯は100文字以内で入力してください")
+        return v
 
 class WorkResponse(BaseModel):
     id: int
@@ -206,14 +288,15 @@ def admin_login(request: Request, login: AdminLogin):
         login.username != settings.admin_username
         or not verify_password(login.password, settings.admin_password_hash)
     ):
-        logger.warning(f"ログイン失敗: username={login.username}")
+        # ログインジェクション対策: usernameをrepr()でサニタイズしてから記録
+        logger.warning(f"ログイン失敗: username={repr(login.username)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="ユーザー名またはパスワードが正しくありません",
         )
 
     token = create_access_token(data={"sub": login.username})
-    logger.info(f"管理者ログイン成功: {login.username}")
+    logger.info(f"管理者ログイン成功: {repr(login.username)}")
     return {"access_token": token, "token_type": "bearer"}
 
 
@@ -308,13 +391,17 @@ def delete_contact(
 # ===== 一般公開API (News & Works) =====
 
 @app.get("/api/news")
-def list_published_news(skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
-    news = db.query(models.NewsItem).filter(models.NewsItem.is_published == True).order_by(models.NewsItem.published_at.desc()).offset(skip).limit(limit).all()
+@limiter.limit("30/minute")
+def list_published_news(request: Request, skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
+    capped_limit = min(limit, 100)  # 最大100件
+    news = db.query(models.NewsItem).filter(models.NewsItem.is_published == True).order_by(models.NewsItem.published_at.desc()).offset(skip).limit(capped_limit).all()
     return [{"id": n.id, "title": n.title, "content": n.content, "published_at": n.published_at.isoformat() if n.published_at else None} for n in news]
 
 @app.get("/api/works")
-def list_works(skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
-    works = db.query(models.WorkItem).order_by(models.WorkItem.created_at.desc()).offset(skip).limit(limit).all()
+@limiter.limit("30/minute")
+def list_works(request: Request, skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
+    capped_limit = min(limit, 100)  # 最大100件
+    works = db.query(models.WorkItem).order_by(models.WorkItem.created_at.desc()).offset(skip).limit(capped_limit).all()
     return [
         {
             "id": w.id, "title": w.title, "description": w.description, 
@@ -323,7 +410,8 @@ def list_works(skip: int = 0, limit: int = 20, db: Session = Depends(get_db)):
     ]
 
 @app.get("/api/works/{work_id}")
-def get_work(work_id: int, db: Session = Depends(get_db)):
+@limiter.limit("30/minute")
+def get_work(request: Request, work_id: int, db: Session = Depends(get_db)):
     work = db.query(models.WorkItem).filter(models.WorkItem.id == work_id).first()
     if not work:
         raise HTTPException(status_code=404, detail="施工事例が見つかりません")
@@ -341,34 +429,58 @@ def admin_list_news(admin: str = Depends(get_current_admin), db: Session = Depen
 
 @app.post("/api/admin/news")
 def create_news(news: NewsCreate, admin: str = Depends(get_current_admin), db: Session = Depends(get_db)):
-    db_news = models.NewsItem(title=news.title, content=news.content, is_published=news.is_published)
-    db.add(db_news)
-    db.commit()
-    db.refresh(db_news)
-    return {"status": "success", "id": db_news.id}
+    try:
+        db_news = models.NewsItem(title=news.title, content=news.content, is_published=news.is_published)
+        db.add(db_news)
+        db.commit()
+        db.refresh(db_news)
+        logger.info(f"お知らせ作成: ID={db_news.id} by {repr(admin)}")
+        return {"status": "success", "id": db_news.id}
+    except Exception as e:
+        db.rollback()
+        logger.error(f"お知らせ作成エラー: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="お知らせの作成に失敗しました")
 
 @app.delete("/api/admin/news/{news_id}")
 def delete_news(news_id: int, admin: str = Depends(get_current_admin), db: Session = Depends(get_db)):
     db_news = db.query(models.NewsItem).filter(models.NewsItem.id == news_id).first()
     if not db_news:
         raise HTTPException(status_code=404, detail="お知らせが見つかりません")
-    db.delete(db_news)
-    db.commit()
-    return {"status": "success"}
+    try:
+        db.delete(db_news)
+        db.commit()
+        logger.info(f"お知らせ削除: ID={news_id} by {repr(admin)}")
+        return {"status": "success"}
+    except Exception as e:
+        db.rollback()
+        logger.error(f"お知らせ削除エラー: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="お知らせの削除に失敗しました")
 
 @app.post("/api/admin/works")
 def create_work(work: WorkCreate, admin: str = Depends(get_current_admin), db: Session = Depends(get_db)):
-    db_work = models.WorkItem(**work.model_dump())
-    db.add(db_work)
-    db.commit()
-    db.refresh(db_work)
-    return {"status": "success", "id": db_work.id}
+    try:
+        db_work = models.WorkItem(**work.model_dump())
+        db.add(db_work)
+        db.commit()
+        db.refresh(db_work)
+        logger.info(f"施工事例作成: ID={db_work.id} by {repr(admin)}")
+        return {"status": "success", "id": db_work.id}
+    except Exception as e:
+        db.rollback()
+        logger.error(f"施工事例作成エラー: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="施工事例の作成に失敗しました")
 
 @app.delete("/api/admin/works/{work_id}")
 def delete_work(work_id: int, admin: str = Depends(get_current_admin), db: Session = Depends(get_db)):
     db_work = db.query(models.WorkItem).filter(models.WorkItem.id == work_id).first()
     if not db_work:
         raise HTTPException(status_code=404, detail="施工事例が見つかりません")
-    db.delete(db_work)
-    db.commit()
-    return {"status": "success"}
+    try:
+        db.delete(db_work)
+        db.commit()
+        logger.info(f"施工事例削除: ID={work_id} by {repr(admin)}")
+        return {"status": "success"}
+    except Exception as e:
+        db.rollback()
+        logger.error(f"施工事例削除エラー: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="施工事例の削除に失敗しました")

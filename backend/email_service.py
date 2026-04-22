@@ -1,4 +1,5 @@
 import smtplib
+import ssl
 import logging
 from email.message import EmailMessage
 from email.utils import formataddr
@@ -29,7 +30,7 @@ def send_auto_reply_email(to_email: str, name: str):
 渡部工務店
 〒998-0000 山形県酒田市テスト町1-2-3
 TEL: 0234-XX-XXXX
-URL: http://localhost:3000
+URL: {settings.site_url}
 --------------------------------------------------
 """
 
@@ -50,8 +51,10 @@ URL: http://localhost:3000
     msg["To"] = to_email
 
     try:
+        # TLS証明書を検証するセキュアなコンテキストを使用
+        ssl_context = ssl.create_default_context()
         with smtplib.SMTP(settings.smtp_server, settings.smtp_port) as server:
-            server.starttls()
+            server.starttls(context=ssl_context)
             if settings.smtp_user and settings.smtp_password:
                 server.login(settings.smtp_user, settings.smtp_password)
             server.send_message(msg)
