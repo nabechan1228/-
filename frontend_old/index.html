@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プレミアムモダンハウス - あなたの理想の住まい</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- ナビゲーション -->
+    <nav class="navbar">
+        <div class="logo">LUXE BUILD</div>
+        <ul class="nav-links">
+            <li><a href="#concept">Concept</a></li>
+            <li><a href="#gallery">Gallery</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- ヒーローセクション -->
+    <header class="hero">
+        <img src="C:/Users/nabe4/.gemini/antigravity/brain/f51d0cd6-f5ca-45a6-a047-2c644373a8f5/modern_house_exterior_1776722904276.png" alt="美しいモダンな家" class="hero-bg">
+        <div class="hero-content glass-panel">
+            <h1>Architecture of<br>Tomorrow</h1>
+            <p>光と風がデザインする、<br>未来のプレミアムモダン住宅</p>
+            <a href="#contact" class="btn">お問い合わせ</a>
+        </div>
+    </header>
+
+    <!-- コンセプトセクション -->
+    <section id="concept" class="section fade-in">
+        <div class="container">
+            <h2 class="section-title">Concept</h2>
+            <div class="split-layout">
+                <div class="text-content">
+                    <p>私たちは、住む人の感性を研ぎ澄ますような、美しく機能的な空間づくりを追求しています。無駄を省いたミニマルなデザイン、自然素材と最新テクノロジーの融合が、最高の住み心地をお約束します。</p>
+                </div>
+                <div class="image-content">
+                    <img src="C:/Users/nabe4/.gemini/antigravity/brain/f51d0cd6-f5ca-45a6-a047-2c644373a8f5/modern_house_interior_1776722920080.png" alt="モダンなリビング">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- コンタクトセクション -->
+    <section id="contact" class="section dark-bg fade-in">
+        <div class="container">
+            <h2 class="section-title">Contact Us</h2>
+            <div class="form-container glass-panel">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">お名前</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">メールアドレス</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">電話番号</label>
+                        <input type="tel" id="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">お問い合わせ内容</label>
+                        <textarea id="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn form-btn">送信する</button>
+                    <div id="formMessage" class="hidden"></div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 LUXE BUILD. All rights reserved.</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
