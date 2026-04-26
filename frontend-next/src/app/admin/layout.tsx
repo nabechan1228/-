@@ -1,7 +1,38 @@
 "use client";
 
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+
+/**
+ * 認証付きfetchラッパー
+ * 401レスポンス時に自動的にトークンを削除しログイン画面へリダイレクト
+ */
+export function useAuthFetch() {
+  const router = useRouter();
+
+  const authFetch = useCallback(async (url: string, options: RequestInit = {}) => {
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      router.push('/admin/login');
+      throw new Error('認証トークンがありません');
+    }
+
+    const headers = new Headers(options.headers || {});
+    headers.set('Authorization', `Bearer ${token}`);
+
+    const response = await fetch(url, { ...options, headers });
+
+    if (response.status === 401) {
+      localStorage.removeItem('admin_token');
+      router.push('/admin/login');
+      throw new Error('認証の有効期限が切れました。再度ログインしてください。');
+    }
+
+    return response;
+  }, [router]);
+
+  return authFetch;
+}
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();

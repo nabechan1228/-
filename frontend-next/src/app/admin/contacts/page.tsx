@@ -1,18 +1,17 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useAuthFetch } from '../layout';
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const authFetch = useAuthFetch();
 
   const fetchContacts = async () => {
     try {
-      const token = localStorage.getItem('admin_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/admin/contacts`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await authFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/admin/contacts`);
       if (!response.ok) throw new Error('取得失敗');
       const data = await response.json();
       setContacts(data.contacts || []);
@@ -29,10 +28,8 @@ export default function ContactsPage() {
 
   const handleMarkRead = async (id: number) => {
     try {
-      const token = localStorage.getItem('admin_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/admin/contacts/${id}/read`, {
+      const response = await authFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/admin/contacts/${id}/read`, {
         method: 'PATCH',
-        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
         setContacts(contacts.map(c => c.id === id ? { ...c, is_read: true } : c));
@@ -45,10 +42,8 @@ export default function ContactsPage() {
   const handleDelete = async (id: number) => {
     if (!confirm('本当に削除しますか？')) return;
     try {
-      const token = localStorage.getItem('admin_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/admin/contacts/${id}`, {
+      const response = await authFetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000'}/api/admin/contacts/${id}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
         setContacts(contacts.filter(c => c.id !== id));
