@@ -11,8 +11,11 @@ export default function WorksPage() {
   const [mainImageUrl, setMainImageUrl] = useState('');
   const [location, setLocation] = useState('');
   const [priceRange, setPriceRange] = useState('');
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editData, setEditData] = useState({ title: '', description: '', main_image_url: '', location: '', price_range: '' });
+  const [editData, setEditData] = useState({ title: '', description: '', main_image_url: '', location: '', price_range: '', image_urls: [] as string[] });
+  
   const authFetch = useAuthFetch();
   const API = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -25,20 +28,59 @@ export default function WorksPage() {
   };
   useEffect(() => { fetchWorks(); }, []);
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, isMain: boolean, isEdit: boolean) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await authFetch(`${API}/api/admin/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const url = `${API}${data.url}`;
+        if (isEdit) {
+            if (isMain) setEditData({...editData, main_image_url: url});
+            else setEditData({...editData, image_urls: [...editData.image_urls, url]});
+        } else {
+            if (isMain) setMainImageUrl(url);
+            else setImageUrls([...imageUrls, url]);
+        }
+      } else {
+        alert('画像のアップロードに失敗しました');
+      }
+    } catch (err) {
+      alert('エラーが発生しました');
+    }
+    // reset input
+    e.target.value = '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const r = await authFetch(`${API}/api/admin/works`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, main_image_url: mainImageUrl, location, price_range: priceRange })
+        body: JSON.stringify({ title, description, main_image_url: mainImageUrl, location, price_range: priceRange, image_urls: imageUrls })
       });
-      if (r.ok) { setTitle(''); setDescription(''); setMainImageUrl(''); setLocation(''); setPriceRange(''); fetchWorks(); }
+      if (r.ok) { 
+          setTitle(''); setDescription(''); setMainImageUrl(''); setLocation(''); setPriceRange(''); setImageUrls([]); 
+          fetchWorks(); 
+      }
     } catch { alert('エラーが発生しました'); }
   };
 
   const handleEdit = (item: any) => {
     setEditingId(item.id);
-    setEditData({ title: item.title, description: item.description || '', main_image_url: item.main_image_url || '', location: item.location || '', price_range: item.price_range || '' });
+    setEditData({ 
+        title: item.title, description: item.description || '', 
+        main_image_url: item.main_image_url || '', location: item.location || '', 
+        price_range: item.price_range || '', image_urls: item.image_urls || [] 
+    });
   };
   const handleCancelEdit = () => { setEditingId(null); };
 
@@ -82,8 +124,22 @@ export default function WorksPage() {
             <input type="text" value={priceRange} onChange={e => setPriceRange(e.target.value)} style={inputStyle} />
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>メイン画像URL</label>
-            <input type="url" value={mainImageUrl} onChange={e => setMainImageUrl(e.target.value)} placeholder="https://..." style={inputStyle} />
+            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>メイン画像</label>
+            <input type="file" accept="image/*" onChange={e => handleImageUpload(e, true, false)} style={inputStyle} />
+            {mainImageUrl && <img src={mainImageUrl} alt="preview" style={{ width: '100px', marginTop: '10px' }} />}
+            <input type="url" value={mainImageUrl} onChange={e => setMainImageUrl(e.target.value)} placeholder="またはURLを直接入力" style={{...inputStyle, marginTop: '5px'}} />
+          </div>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>サブ画像</label>
+            <input type="file" accept="image/*" onChange={e => handleImageUpload(e, false, false)} style={inputStyle} />
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
+              {imageUrls.map((url, i) => (
+                <div key={i} style={{ position: 'relative' }}>
+                  <img src={url} alt={`sub-${i}`} style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
+                  <button type="button" onClick={() => setImageUrls(urls => urls.filter((_, idx) => idx !== i))} style={{ position: 'absolute', top: 0, right: 0, background: 'red', color: 'white', border: 'none', cursor: 'pointer', width: '20px', height: '20px', borderRadius: '50%' }}>×</button>
+                </div>
+              ))}
+            </div>
           </div>
           <div style={{ gridColumn: '1 / -1' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.9rem' }}>説明文</label>
@@ -112,9 +168,12 @@ export default function WorksPage() {
               <tr key={item.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                 <td style={{ padding: '15px' }}>
                   {editingId === item.id ? (
-                    <input type="url" value={editData.main_image_url} onChange={e => setEditData({...editData, main_image_url: e.target.value})} placeholder="https://..." style={{ width: '60px', padding: '4px', fontSize: '0.7rem', border: '1px solid #d1d5db', borderRadius: '4px' }} />
+                    <div>
+                        <input type="file" accept="image/*" onChange={e => handleImageUpload(e, true, true)} style={{ width: '60px', fontSize: '0.7rem' }} />
+                        <input type="url" value={editData.main_image_url} onChange={e => setEditData({...editData, main_image_url: e.target.value})} placeholder="URL" style={{ width: '60px', padding: '4px', fontSize: '0.7rem', border: '1px solid #d1d5db', borderRadius: '4px' }} />
+                    </div>
                   ) : item.main_image_url ? (
-                    <img src={item.main_image_url} alt="サムネイル" style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
+                    <img src={item.main_image_url.startsWith('/uploads') ? `${API}${item.main_image_url}` : item.main_image_url} alt="サムネイル" style={{ width: '60px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} />
                   ) : (<div style={{ width: '60px', height: '40px', background: '#e5e7eb', borderRadius: '4px' }}></div>)}
                 </td>
                 <td style={{ padding: '15px', fontSize: '0.9rem', fontWeight: '500' }}>

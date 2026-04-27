@@ -4,8 +4,11 @@ House Maker API
 """
 import logging
 import re
+import os
+import shutil
+import uuid
 
-from fastapi import FastAPI, Depends, HTTPException, Query, Request, status, BackgroundTasks
+from fastapi import FastAPI, Depends, HTTPException, Query, Request, status, BackgroundTasks, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
@@ -15,6 +18,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.staticfiles import StaticFiles
 
 import models
 from database import engine, get_db
@@ -45,6 +49,9 @@ app = FastAPI(
 )
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 # ===== ミドルウェア =====
@@ -209,6 +216,7 @@ class WorkCreate(BaseModel):
     main_image_url: str | None = None
     location: str | None = None
     price_range: str | None = None
+    image_urls: list[str] = []
 
     @field_validator("title")
     @classmethod
@@ -265,6 +273,7 @@ class WorkUpdate(BaseModel):
     main_image_url: str | None = None
     location: str | None = None
     price_range: str | None = None
+    image_urls: list[str] | None = None
 
     @field_validator("title")
     @classmethod
@@ -326,6 +335,7 @@ class WorkResponse(BaseModel):
     main_image_url: str | None
     location: str | None
     price_range: str | None
+    image_urls: list[str] = []
     created_at: str | None
 
     class Config:
@@ -524,13 +534,22 @@ def list_works(
     request: Request,
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=20, ge=1, le=100),
+    location: str | None = Query(default=None),
+    price_range: str | None = Query(default=None),
     db: Session = Depends(get_db),
 ):
-    works = db.query(models.WorkItem).order_by(models.WorkItem.created_at.desc()).offset(skip).limit(limit).all()
+    query = db.query(models.WorkItem)
+    if location:
+        query = query.filter(models.WorkItem.location.contains(location))
+    if price_range:
+        query = query.filter(models.WorkItem.price_range.contains(price_range))
+        
+    works = query.order_by(models.WorkItem.created_at.desc()).offset(skip).limit(limit).all()
     return [
         {
             "id": w.id, "title": w.title, "description": w.description, 
-            "main_image_url": w.main_image_url, "location": w.location, "price_range": w.price_range
+            "main_image_url": w.main_image_url, "location": w.location, "price_range": w.price_range,
+            "image_urls": [img.image_url for img in w.images]
         } for w in works
     ]
 
@@ -542,7 +561,8 @@ def get_work(request: Request, work_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="施工事例が見つかりません")
     return {
         "id": work.id, "title": work.title, "description": work.description, 
-        "main_image_url": work.main_image_url, "location": work.location, "price_range": work.price_range
+        "main_image_url": work.main_image_url, "location": work.location, "price_range": work.price_range,
+        "image_urls": [img.image_url for img in work.images]
     }
 
 # ===== 管理者API (News & Works CRUD) =====
@@ -600,11 +620,37 @@ def delete_news(news_id: int, admin: str = Depends(get_current_admin), db: Sessi
         logger.error(f"お知らせ削除エラー: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="お知らせの削除に失敗しました")
 
+@app.post("/api/admin/upload")
+def upload_image(
+    file: UploadFile = File(...),
+    admin: str = Depends(get_current_admin)
+):
+    try:
+        ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+        filename = f"{uuid.uuid4().hex}.{ext}"
+        filepath = os.path.join("uploads", filename)
+        with open(filepath, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        
+        # 開発環境用（本来はS3などのURLを返す）
+        url = f"/uploads/{filename}"
+        return {"status": "success", "url": url}
+    except Exception as e:
+        logger.error(f"画像アップロードエラー: {e}")
+        raise HTTPException(status_code=500, detail="画像のアップロードに失敗しました")
+
 @app.post("/api/admin/works")
 def create_work(work: WorkCreate, admin: str = Depends(get_current_admin), db: Session = Depends(get_db)):
     try:
-        db_work = models.WorkItem(**work.model_dump())
+        work_data = work.model_dump(exclude={"image_urls"})
+        db_work = models.WorkItem(**work_data)
         db.add(db_work)
+        db.flush() # IDを取得するため
+
+        for idx, url in enumerate(work.image_urls):
+            db_image = models.WorkImage(work_id=db_work.id, image_url=url, display_order=idx)
+            db.add(db_image)
+
         db.commit()
         db.refresh(db_work)
         logger.info(f"施工事例作成: ID={db_work.id} by {repr(admin)}")
@@ -621,9 +667,18 @@ def update_work(work_id: int, work: WorkUpdate, admin: str = Depends(get_current
     if not db_work:
         raise HTTPException(status_code=404, detail="施工事例が見つかりません")
     try:
-        update_data = work.model_dump(exclude_unset=True)
+        update_data = work.model_dump(exclude_unset=True, exclude={"image_urls"})
         for key, value in update_data.items():
             setattr(db_work, key, value)
+            
+        if work.image_urls is not None:
+            # 既存の画像を削除
+            db.query(models.WorkImage).filter(models.WorkImage.work_id == work_id).delete()
+            # 新しい画像を追加
+            for idx, url in enumerate(work.image_urls):
+                db_image = models.WorkImage(work_id=work_id, image_url=url, display_order=idx)
+                db.add(db_image)
+
         db.commit()
         db.refresh(db_work)
         logger.info(f"施工事例更新: ID={work_id} by {repr(admin)}")
